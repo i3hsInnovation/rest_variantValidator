@@ -198,34 +198,37 @@ def remote_connection_error_handler(e):
 
 
 @application.errorhandler(404)
-def not_found_error_handler():
+def not_found_error_handler(e):
+    # Add the Exception to the log ensuring that exc_info is True so that a traceback is also logged
+    log_exception('NotFoundError')
+
     # Collect Arguments
     args = parser.parse_args()
     if args['content-type'] != 'application/xml':
-        return json({'message': 'Requested Endpoint not found'},
+        return application_json({'message': 'Requested Endpoint not found'},
                                 404,
                                 None)
     else:
-        return xml({'message': 'Requested Endpoint not found'},
-                   404,
-                   None)
+        return application_xml({'message': 'Requested Endpoint not found'},
+                               404,
+                               None)
 
 
 @application.errorhandler(500)
-def default_error_handler():
+def default_error_handler(e):
     # Add the Exception to the log ensuring that exc_info is True so that a traceback is also logged
-    log_exception('RemoteConnectionError')
+    log_exception('InternalServerError')
 
     # Collect Arguments
     args = parser.parse_args()
     if args['content-type'] != 'application/xml':
-        return json({'message': 'unhandled error: contact https://variantvalidator.org/contact_admin/'},
+        return application_json({'message': 'unhandled error: contact https://variantvalidator.org/contact_admin/'},
                                 500,
                                 None)
     else:
-        return xml({'message': 'unhandled error: contact https://variantvalidator.org/contact_admin/'},
-                   500,
-                   None)
+        return application_xml({'message': 'unhandled error: contact https://variantvalidator.org/contact_admin/'},
+                               500,
+                               None)
 
 
 # Allows app to be run in debug mode
